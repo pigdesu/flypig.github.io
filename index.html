@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🎂 永久保存的17岁生日贺卡</title>
+    <!-- 引入截图库 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --gold: #c9a96e;
+            --gold-light: #e0c78a;
+            --pink: #e8917e;
+            --pink-soft: #f7c5b5;
+            --text-dark: #3d2c2a;
+            --text-medium: #5a3e3a;
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+            --font-title: 'Georgia', 'Noto Serif SC', serif;
+            --font-body: 'Georgia', 'Noto Serif SC', 'STKaiti', 'KaiTi', serif;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(145deg, #fdf2f0 0%, #fef9f0 30%, #fff5f5 60%, #fdf6f0 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            user-select: none; -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+        }
+        .bg-particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+        .bg-particle { position:absolute; border-radius:50%; pointer-events:none; animation:floatUp linear infinite; opacity:0; }
+        @keyframes floatUp {
+            0% { transform:translateY(105vh) rotate(0deg) scale(0.3); opacity:0; }
+            10% { opacity:0.65; } 70% { opacity:0.45; }
+            100% { transform:translateY(-10vh) rotate(360deg) scale(1.2); opacity:0; }
+        }
+        .app-container {
+            position:relative; z-index:1; width:94vw; max-width:1100px; height:88vh;
+            max-height:800px; min-height:500px; background:#fff;
+            border-radius:24px; box-shadow:var(--shadow),0 0 0 1px rgba(0,0,0,0.04);
+            display:flex; flex-direction:column; overflow:hidden;
+        }
+        .toolbar {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:10px 18px; background:#fffefb; border-bottom:1px solid #f0e6db;
+            flex-shrink:0; flex-wrap:wrap; gap:6px; z-index:10;
+        }
+        .toolbar-left, .toolbar-center, .toolbar-right { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+        .toolbar-title { font-family:var(--font-title); font-size:1.1rem; color:var(--text-dark); font-weight:bold; white-space:nowrap; }
+        .btn {
+            padding:7px 14px; border:1.5px solid #e0d5c5; border-radius:25px;
+            cursor:pointer; font-family:var(--font-body); font-size:0.85rem;
+            background:#fffefb; color:var(--text-medium); transition:all 0.2s;
+            white-space:nowrap; display:flex; align-items:center; gap:5px;
+        }
+        .btn:hover { background:#fef7f0; border-color:var(--gold-light); color:#3d2c2a; transform:translateY(-1px); box-shadow:0 3px 12px rgba(180,140,100,0.2); }
+        .btn:active { transform:scale(0.96); }
+        .btn.active { background:#fef3e8; border-color:var(--gold); color:#8b5e3c; font-weight:bold; }
+        .btn-accent { background:linear-gradient(135deg,#fce4d6,#fef0e6); border-color:var(--pink-soft); color:#9b4a3a; }
+        .btn-delete { background:#fff5f5; border-color:#f0c8c0; color:#b05040; }
+        .btn-icon { width:36px; height:36px; padding:0; border-radius:50%; justify-content:center; font-size:1.1rem; }
+        .divider { width:1px; height:24px; background:#e8ddd0; margin:0 4px; }
+
+        .slides-viewport { flex:1; overflow:hidden; position:relative; background:#fdfaf7; border-radius:0 0 20px 20px; }
+        .slides-track { display:flex; height:100%; transition:transform var(--transition); will-change:transform; }
+        .slide {
+            flex:0 0 100%; height:100%; position:relative; overflow:hidden;
+            padding:20px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+        }
+        .slide-bg-0 { background:linear-gradient(170deg,#fff9f3,#fef5ee,#fff8f5,#fefaf6); }
+        .slide-bg-1 { background:linear-gradient(170deg,#fefaf7,#fff7f3,#fef9f5,#fffaf7); }
+        .slide-bg-2 { background:linear-gradient(170deg,#fff8f4,#fef6f1,#fff9f6,#fef8f4); }
+        .slide-bg-3 { background:linear-gradient(170deg,#fef9f5,#fff8f2,#fef7f3,#fffaf6); }
+        .slide-bg-4 { background:linear-gradient(170deg,#fffaf5,#fef7f0,#fff8f4,#fefaf5); }
+
+        .slide-decoration { position:absolute; pointer-events:none; opacity:0.25; z-index:0; }
+        .deco-circle { border-radius:50%; border:2px dashed var(--gold-light); }
+        .deco-dot { border-radius:50%; background:var(--pink-soft); }
+
+        .slide-element { position:absolute; cursor:default; transition:outline 0.2s,box-shadow 0.2s; z-index:2; }
+        .edit-mode .slide-element.draggable { cursor:move; outline:2px dashed transparent; }
+        .edit-mode .slide-element.draggable:hover { outline:2px dashed #d4a574; box-shadow:0 0 0 6px rgba(200,150,110,0.12); }
+        .edit-mode .slide-element.draggable.selected { outline:2.5px solid var(--gold)!important; box-shadow:0 0 0 10px rgba(200,150,100,0.18)!important; z-index:20!important; }
+        .slide-element.dragging { z-index:30!important; opacity:0.9; transition:none!important; }
+        .element-delete-btn {
+            position:absolute; top:-11px; right:-11px; width:24px; height:24px;
+            border-radius:50%; background:#e07060; color:#fff; border:2px solid #fff;
+            cursor:pointer; font-size:13px; line-height:20px; text-align:center;
+            display:none; z-index:25; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        }
+        .edit-mode .slide-element.draggable.selected .element-delete-btn { display:block; }
+
+        .element-image-container { display:inline-block; }
+        .element-image {
+            border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.15),0 0 0 6px #fff,0 0 0 9px #f0e0d0;
+            object-fit:cover; display:block; pointer-events:none;
+        }
+        .resize-handle {
+            position:absolute; bottom:-8px; right:-8px; width:22px; height:22px;
+            background:var(--gold); border:2px solid white; border-radius:50%;
+            cursor:nwse-resize; display:none; z-index:31; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+        }
+        .edit-mode .element-image-container.selected .resize-handle { display:block; }
+
+        .element-text {
+            font-family:var(--font-title); color:var(--text-dark);
+            padding:8px 16px; border-radius:8px; background:rgba(255,255,255,0.55);
+            backdrop-filter:blur(2px); white-space:pre-wrap; word-break:break-word;
+            min-width:30px; text-align:center;
+        }
+
+        .nav-bar {
+            display:flex; align-items:center; justify-content:center; gap:20px;
+            padding:12px 20px; background:#fffefb; border-top:1px solid #f0e6db;
+            flex-shrink:0; z-index:10; border-radius:0 0 20px 20px;
+        }
+        .nav-arrow {
+            width:44px; height:44px; border-radius:50%; border:2px solid #e0d5c5;
+            background:#fffefb; cursor:pointer; font-size:1.3rem; color:var(--text-medium);
+            display:flex; align-items:center; justify-content:center; transition:0.2s;
+        }
+        .nav-arrow:hover { background:#fef7f0; border-color:var(--gold); color:#3d2c2a; box-shadow:0 4px 16px rgba(180,140,100,0.25); transform:scale(1.05); }
+        .nav-arrow:disabled { opacity:0.35; pointer-events:none; }
+        .page-indicators { display:flex; gap:8px; align-items:center; }
+        .page-dot { width:12px; height:12px; border-radius:50%; background:#e0d5c5; cursor:pointer; transition:0.3s; border:2px solid transparent; }
+        .page-dot.active { background:var(--gold); border-color:#b8935a; width:30px; border-radius:12px; }
+        .page-num { font-family:var(--font-title); font-size:0.95rem; color:var(--text-medium); min-width:50px; text-align:center; }
+
+        .style-panel {
+            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+            background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2);
+            padding:20px 24px; z-index:100; width:320px; max-width:90vw;
+            display:none; flex-direction:column; gap:14px; font-family:var(--font-body);
+        }
+        .style-panel.show { display:flex; }
+        .style-row { display:flex; align-items:center; gap:8px; }
+        .style-row label { width:50px; font-size:0.85rem; color:var(--text-medium); }
+        .style-row select, .style-row input { flex:1; padding:6px 8px; border:1px solid #e0d5c5; border-radius:12px; font-family:inherit; background:#fffefb; }
+        .style-row input[type="color"] { padding:2px 4px; height:34px; }
+        .style-buttons { display:flex; justify-content:flex-end; gap:10px; margin-top:6px; }
+        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.2); z-index:99; display:none; }
+        .overlay.show { display:block; }
+
+        .toast {
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+            background:#3d2c2a; color:#fef9f0; padding:12px 24px; border-radius:30px;
+            font-size:0.9rem; z-index:200; opacity:0; pointer-events:none;
+            transition:opacity 0.35s,transform 0.35s; letter-spacing:0.5px;
+            box-shadow:0 8px 30px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(-8px); }
+
+        @media (max-width:768px) {
+            .app-container { width:96vw; height:85vh; min-height:420px; border-radius:16px; }
+            .toolbar { padding:8px 10px; gap:4px; }
+            .btn { padding:5px 10px; font-size:0.75rem; }
+            .slide { padding:12px 16px; }
+            .nav-bar { padding:8px 12px; gap:10px; }
+            .nav-arrow { width:36px; height:36px; font-size:1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="bg-particles" id="bgParticles"></div>
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"></div>
+
+<div class="style-panel" id="stylePanel">
+    <h4>✏️ 文字样式</h4>
+    <div class="style-row"><label>字体</label><select id="styleFont"><option value="Georgia, serif">Georgia</option><option value="Arial, sans-serif">Arial</option><option value="'Noto Serif SC', serif">宋体</option><option value="'STKaiti','KaiTi',serif">楷体</option><option value="'Microsoft YaHei',sans-serif">微软雅黑</option></select></div>
+    <div class="style-row"><label>字号</label><select id="styleSize"><option value="0.9rem">小</option><option value="1.1rem">中</option><option value="1.4rem" selected>大</option><option value="1.8rem">特大</option><option value="2.2rem">超大</option></select></div>
+    <div class="style-row"><label>颜色</label><input type="color" id="styleColor" value="#5a3e3a"></div>
+    <div class="style-row"><label>粗细</label><select id="styleWeight"><option value="normal">常规</option><option value="bold">粗体</option></select></div>
+    <div class="style-row"><label>对齐</label><select id="styleAlign"><option value="left">左对齐</option><option value="center" selected>居中</option><option value="right">右对齐</option></select></div>
+    <div class="style-buttons"><button class="btn" id="btnCancelStyle">取消</button><button class="btn btn-accent" id="btnApplyStyle">应用</button></div>
+</div>
+
+<div class="app-container" id="appContainer">
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <span class="toolbar-title">🎂 17岁贺卡</span>
+            <button class="btn btn-icon" id="btnAddPage" title="添加新页面">➕</button>
+            <button class="btn btn-icon" id="btnRemovePage" title="删除当前页">➖</button>
+        </div>
+        <div class="toolbar-center">
+            <button class="btn btn-accent" id="btnAddPhoto">📷 照片</button>
+            <button class="btn" id="btnAddText">✏️ 文字</button>
+            <button class="btn btn-delete" id="btnDeleteSelected" disabled>🗑️ 删除</button>
+            <span class="divider"></span>
+            <button class="btn" id="btnExportImage" title="导出当前页为图片">📥 导出图片</button>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn" id="btnToggleEdit">🔓 编辑</button>
+            <button class="btn btn-icon" id="btnReset" title="恢复默认并清除保存">🔄</button>
+        </div>
+    </div>
+    <div class="slides-viewport" id="slidesViewport">
+        <div class="slides-track" id="slidesTrack"></div>
+    </div>
+    <div class="nav-bar">
+        <button class="nav-arrow" id="btnPrev">◀</button>
+        <div class="page-indicators" id="pageIndicators"></div>
+        <span class="page-num" id="pageNumLabel">1 / 5</span>
+        <button class="nav-arrow" id="btnNext">▶</button>
+    </div>
+</div>
+<input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+
+<script>
+    (function() {
+        // ---------- 本地存储 ----------
+        const STORAGE_KEY = 'birthday17_card_data';
+
+        // 默认初始5页数据
+        const DEFAULT_PAGES = [
+            { elements: [
+                { type:'text', left:50, top:20, content:'🎉 Happy 17th Birthday! 🎉', fontSize:'1.8rem', color:'#b84a3a', fontWeight:'bold', textAlign:'center', fontFamily:'Georgia, "Noto Serif SC", serif' },
+                { type:'text', left:50, top:42, content:'亲爱的朋友，祝你17岁生日快乐！', fontSize:'1.2rem', color:'#5a3e3a', fontWeight:'normal', textAlign:'center', fontFamily:'"STKaiti","KaiTi",serif' },
+                { type:'text', left:50, top:62, content:'✨ 愿你的每一天都闪闪发光 ✨', fontSize:'1rem', color:'#c9a96e', fontWeight:'normal', textAlign:'center', fontFamily:'"STKaiti","KaiTi",serif' }
+            ], decorations:[{type:'circle',left:8,top:10,size:70},{type:'dot',left:85,top:70,size:12}] },
+            { elements: [
+                { type:'text', left:50, top:12, content:'📸 美好回忆', fontSize:'1.6rem', color:'#5a3e3a', fontWeight:'bold', textAlign:'center', fontFamily:'Georgia, serif' },
+                { type:'text', left:50, top:24, content:'放上你们的合照吧', fontSize:'0.9rem', color:'#a08070', fontWeight:'normal', textAlign:'center', fontFamily:'"STKaiti",serif' }
+            ], decorations:[{type:'dot',left:15,top:50,size:8}] },
+            { elements: [
+                { type:'text', left:50, top:20, content:'💌 最真挚的祝福', fontSize:'1.6rem', color:'#5a3e3a', fontWeight:'bold', textAlign:'center', fontFamily:'Georgia, serif' },
+                { type:'text', left:50, top:45, content:'17岁是人生中最灿烂的时光\n愿你保持热爱，奔赴山海', fontSize:'1.1rem', color:'#5a3e3a', fontWeight:'normal', textAlign:'center', fontFamily:'"STKaiti",serif', lineHeight:'1.6' }
+            ], decorations:[{type:'circle',left:85,top:15,size:50}] },
+            { elements: [
+                { type:'text', left:50, top:15, content:'🎪 欢乐时光', fontSize:'1.6rem', color:'#5a3e3a', fontWeight:'bold', textAlign:'center', fontFamily:'Georgia, serif' }
+            ], decorations:[{type:'dot',left:20,top:60,size:10}] },
+            { elements: [
+                { type:'text', left:50, top:25, content:'🎁 感谢有你', fontSize:'2rem', color:'#b84a3a', fontWeight:'bold', textAlign:'center', fontFamily:'Georgia, serif' },
+                { type:'text', left:50, top:50, content:'感谢你出现在我的生命里\n17岁，我们一起继续前行！', fontSize:'1.1rem', color:'#5a3e3a', fontWeight:'normal', textAlign:'center', fontFamily:'"STKaiti",serif', lineHeight:'1.6' }
+            ], decorations:[{type:'circle',left:10,top:60,size:45}] }
+        ];
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return JSON.parse(JSON.stringify(DEFAULT_PAGES));
+                }
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_PAGES));
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pagesData));
+            } catch (e) {
+                showToast('⚠️ 存储空间不足，请删除一些照片或页面');
+            }
+        }
+
+        // ---------- 全局状态 ----------
+        let pagesData = loadData();
+        let currentPage = Math.min(pagesData.length - 1, 0);
+        let editMode = true;
+        let selectedElement = null;
+        let isDragging = false, dragTarget = null, dragStartX, dragStartY, dragElemStartLeft, dragElemStartTop;
+        let isResizing = false, resizeTarget = null, resizeStartX, resizeStartY, resizeStartWidth, resizeStartHeight;
+        let currentStyleTarget = null;
+
+        // 背景色循环
+        const BG_CLASSES = ['slide-bg-0','slide-bg-1','slide-bg-2','slide-bg-3','slide-bg-4'];
+
+        // DOM
+        const $ = (s) => document.querySelector(s);
+        const slidesTrack = $('#slidesTrack');
+        const pageIndicators = $('#pageIndicators');
+        const pageNumLabel = $('#pageNumLabel');
+        const btnPrev = $('#btnPrev');
+        const btnNext = $('#btnNext');
+        const btnAddPhoto = $('#btnAddPhoto');
+        const btnAddText = $('#btnAddText');
+        const btnDeleteSelected = $('#btnDeleteSelected');
+        const btnToggleEdit = $('#btnToggleEdit');
+        const btnReset = $('#btnReset');
+        const btnAddPage = $('#btnAddPage');
+        const btnRemovePage = $('#btnRemovePage');
+        const btnExportImage = $('#btnExportImage');
+        const fileInput = $('#fileInput');
+        const toast = $('#toast');
+        const overlay = $('#overlay');
+        const stylePanel = $('#stylePanel');
+        const appContainer = $('#appContainer');
+
+        function showToast(msg) {
+            clearTimeout(window.toastTimer);
+            toast.textContent = msg;
+            toast.classList.add('show');
+            window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ---------- 渲染 ----------
+        function buildAllSlides() {
+            slidesTrack.innerHTML = '';
+            for (let i = 0; i < pagesData.length; i++) {
+                const slide = document.createElement('div');
+                slide.className = `slide ${BG_CLASSES[i % BG_CLASSES.length]}`;
+                slide.dataset.pageIndex = i;
+                slide.id = `slide-${i}`;
+                if (pagesData[i].decorations) {
+                    pagesData[i].decorations.forEach(d => {
+                        const deco = document.createElement('div');
+                        deco.className = 'slide-decoration';
+                        if (d.type === 'circle') {
+                            deco.classList.add('deco-circle');
+                            deco.style.width = d.size + 'px';
+                            deco.style.height = d.size + 'px';
+                        } else if (d.type === 'dot') {
+                            deco.classList.add('deco-dot');
+                            deco.style.width = d.size + 'px';
+                            deco.style.height = d.size + 'px';
+                        }
+                        deco.style.left = d.left + '%';
+                        deco.style.top = d.top + '%';
+                        slide.appendChild(deco);
+                    });
+                }
+                slidesTrack.appendChild(slide);
+            }
+            for (let i = 0; i < pagesData.length; i++) renderPageElements(i);
+        }
+
+        function renderPageElements(pageIndex) {
+            const slide = document.getElementById(`slide-${pageIndex}`);
+            if (!slide) return;
+            slide.querySelectorAll('.slide-element').forEach(el => el.remove());
+            if (!pagesData[pageIndex] || !pagesData[pageIndex].elements) return;
+
+            pagesData[pageIndex].elements.forEach((elem, idx) => {
+                const el = document.createElement('div');
+                el.className = 'slide-element draggable';
+                el.dataset.elemIndex = idx;
+                el.style.left = elem.left + '%';
+                el.style.top = elem.top + '%';
+                el.style.position = 'absolute';
+                el.style.transform = 'translate(-50%, -50%)';
+
+                if (elem.type === 'text') {
+                    el.classList.add('element-text');
+                    el.textContent = elem.content;
+                    el.style.fontSize = elem.fontSize || '1.2rem';
+                    el.style.color = elem.color || '#3d2c2a';
+                    el.style.fontWeight = elem.fontWeight || 'normal';
+                    el.style.textAlign = elem.textAlign || 'center';
+                    el.style.fontFamily = elem.fontFamily || 'Georgia, serif';
+                    if (elem.lineHeight) el.style.lineHeight = elem.lineHeight;
+                    el.dataset.type = 'text';
+                } else if (elem.type === 'image') {
+                    el.classList.add('element-image-container');
+                    el.dataset.type = 'image';
+                    const img = document.createElement('img');
+                    img.src = elem.src;
+                    img.className = 'element-image';
+                    const w = elem.width || 200;
+                    const h = elem.height || 'auto';
+                    img.style.width = w + 'px';
+                    img.style.height = (h === 'auto' ? 'auto' : h + 'px');
+                    img.style.maxWidth = '300px';
+                    img.draggable = false;
+                    el.appendChild(img);
+                    const handle = document.createElement('div');
+                    handle.className = 'resize-handle';
+                    el.appendChild(handle);
+                    el.dataset.imgWidth = w;
+                    el.dataset.imgHeight = h;
+                }
+
+                const delBtn = document.createElement('span');
+                delBtn.className = 'element-delete-btn';
+                delBtn.innerHTML = '×';
+                delBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); deleteElement(pageIndex, idx); });
+                delBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteElement(pageIndex, idx); });
+                el.appendChild(delBtn);
+
+                el.addEventListener('mousedown', (e) => {
+                    if (e.target === delBtn) return;
+                    if (!editMode) return;
+                    e.preventDefault();
+                    selectElement(el, pageIndex, idx);
+                    startDragOrResize(e, el, pageIndex, idx);
+                });
+                el.addEventListener('touchstart', (e) => {
+                    if (e.target === delBtn) return;
+                    if (!editMode) return;
+                    if (e.touches.length === 1) {
+                        selectElement(el, pageIndex, idx);
+                        startDragOrResize(e.touches[0], el, pageIndex, idx);
+                    }
+                }, { passive: false });
+                el.addEventListener('dblclick', () => {
+                    if (!editMode) return;
+                    if (elem.type === 'text') openStylePanel(pageIndex, idx);
+                });
+                slide.appendChild(el);
+            });
+        }
+
+        function buildPageIndicators() {
+            pageIndicators.innerHTML = '';
+            for (let i = 0; i < pagesData.length; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'page-dot';
+                dot.dataset.page = i;
+                dot.addEventListener('click', () => goToPage(i));
+                pageIndicators.appendChild(dot);
+            }
+        }
+
+        function updateIndicatorsAndNav() {
+            document.querySelectorAll('.page-dot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
+            pageNumLabel.textContent = `${currentPage+1} / ${pagesData.length}`;
+            btnPrev.disabled = currentPage === 0;
+            btnNext.disabled = currentPage >= pagesData.length - 1;
+            btnRemovePage.disabled = pagesData.length <= 1;
+        }
+
+        function goToPage(idx, animate=true) {
+            if (idx < 0 || idx >= pagesData.length) return;
+            currentPage = idx;
+            slidesTrack.style.transition = animate ? `transform var(--transition)` : 'none';
+            slidesTrack.style.transform = `translateX(-${currentPage * 100}%)`;
+            if (!animate) { slidesTrack.offsetHeight; slidesTrack.style.transition = `transform var(--transition)`; }
+            updateIndicatorsAndNav();
+            clearSelection();
+        }
+
+        // ---------- 页面增删 ----------
+        function addPage() {
+            pagesData.push({ elements: [], decorations: [{type:'dot',left:50,top:50,size:12}] });
+            buildAllSlides();
+            buildPageIndicators();
+            goToPage(pagesData.length - 1);
+            saveData();
+            showToast('📄 新页面已添加并保存');
+        }
+
+        function removeCurrentPage() {
+            if (pagesData.length <= 1) return;
+            pagesData.splice(currentPage, 1);
+            if (currentPage >= pagesData.length) currentPage = pagesData.length - 1;
+            buildAllSlides();
+            buildPageIndicators();
+            goToPage(currentPage, false);
+            saveData();
+            showToast('🗑️ 页面已删除');
+        }
+
+        // ---------- 元素操作 ----------
+        function selectElement(el, pageIndex, elemIndex) {
+            clearSelection();
+            selectedElement = { el, pageIndex, elemIndex };
+            el.classList.add('selected');
+            btnDeleteSelected.disabled = false;
+            btnDeleteSelected.style.opacity = '1';
+        }
+        function clearSelection() {
+            if (selectedElement?.el) selectedElement.el.classList.remove('selected');
+            selectedElement = null;
+            btnDeleteSelected.disabled = true;
+            btnDeleteSelected.style.opacity = '0.5';
+        }
+
+        function deleteElement(pageIndex, elemIndex) {
+            pagesData[pageIndex].elements.splice(elemIndex, 1);
+            clearSelection();
+            renderPageElements(pageIndex);
+            saveData();
+            showToast('🗑️ 元素已删除');
+        }
+
+        // ---------- 拖动与缩放 ----------
+        function startDragOrResize(e, el, pageIndex, elemIndex) {
+            if (e.target.classList.contains('resize-handle')) {
+                startResize(e, el, pageIndex, elemIndex);
+                return;
+            }
+            isDragging = true;
+            dragTarget = { el, pageIndex, elemIndex };
+            dragStartX = e.clientX; dragStartY = e.clientY;
+            const slide = document.getElementById(`slide-${pageIndex}`);
+            const sr = slide.getBoundingClientRect();
+            const er = el.getBoundingClientRect();
+            dragElemStartLeft = er.left - sr.left + er.width/2;
+            dragElemStartTop = er.top - sr.top + er.height/2;
+            el.classList.add('dragging');
+            el.style.transition = 'none';
+        }
+
+        function startResize(e, el, pageIndex, elemIndex) {
+            isResizing = true;
+            resizeTarget = { el, pageIndex, elemIndex };
+            resizeStartX = e.clientX; resizeStartY = e.clientY;
+            const img = el.querySelector('img');
+            resizeStartWidth = img.clientWidth;
+            resizeStartHeight = img.clientHeight;
+            e.stopPropagation(); e.preventDefault();
+        }
+
+        function onMouseMove(e) {
+            if (isDragging && dragTarget) {
+                e.preventDefault();
+                const slide = document.getElementById(`slide-${dragTarget.pageIndex}`);
+                const sr = slide.getBoundingClientRect();
+                let newLeft = dragElemStartLeft + (e.clientX - dragStartX);
+                let newTop = dragElemStartTop + (e.clientY - dragStartY);
+                const er = dragTarget.el.getBoundingClientRect();
+                newLeft = Math.max(er.width/2, Math.min(sr.width - er.width/2, newLeft));
+                newTop = Math.max(er.height/2, Math.min(sr.height - er.height/2, newTop));
+                dragTarget.el.style.left = (newLeft/sr.width*100) + '%';
+                dragTarget.el.style.top = (newTop/sr.height*100) + '%';
+            } else if (isResizing && resizeTarget) {
+                e.preventDefault();
+                const dx = e.clientX - resizeStartX;
+                const dy = e.clientY - resizeStartY;
+                const scale = Math.max(dx, dy);
+                let newW = Math.max(50, resizeStartWidth + scale);
+                let newH = (resizeStartHeight/resizeStartWidth) * newW;
+                if (newW > 380) { newW = 380; newH = (resizeStartHeight/resizeStartWidth)*newW; }
+                if (newH > 450) { newH = 450; newW = (resizeStartWidth/resizeStartHeight)*newH; }
+                const img = resizeTarget.el.querySelector('img');
+                img.style.width = newW + 'px';
+                img.style.height = newH + 'px';
+            }
+        }
+
+        function onMouseUp() {
+            if (isDragging && dragTarget) {
+                const slide = document.getElementById(`slide-${dragTarget.pageIndex}`);
+                const sr = slide.getBoundingClientRect();
+                const er = dragTarget.el.getBoundingClientRect();
+                const leftP = Math.round((er.left - sr.left + er.width/2)/sr.width*1000)/10;
+                const topP = Math.round((er.top - sr.top + er.height/2)/sr.height*1000)/10;
+                const elem = pagesData[dragTarget.pageIndex].elements[dragTarget.elemIndex];
+                if (elem) { elem.left = Math.max(2, Math.min(98, leftP)); elem.top = Math.max(2, Math.min(98, topP)); }
+                dragTarget.el.classList.remove('dragging');
+                dragTarget.el.style.transition = '';
+                dragTarget.el.style.left = elem.left + '%';
+                dragTarget.el.style.top = elem.top + '%';
+                isDragging = false; dragTarget = null;
+                saveData();
+            }
+            if (isResizing && resizeTarget) {
+                const img = resizeTarget.el.querySelector('img');
+                const elem = pagesData[resizeTarget.pageIndex].elements[resizeTarget.elemIndex];
+                if (elem && elem.type === 'image') {
+                    elem.width = parseInt(img.style.width);
+                    elem.height = parseInt(img.style.height);
+                }
+                isResizing = false; resizeTarget = null;
+                saveData();
+            }
+        }
+
+        // ---------- 文字样式面板 ----------
+        function openStylePanel(pageIndex, elemIndex) {
+            const elem = pagesData[pageIndex].elements[elemIndex];
+            if (!elem || elem.type !== 'text') return;
+            currentStyleTarget = { pageIndex, elemIndex };
+            $('#styleFont').value = elem.fontFamily || 'Georgia, serif';
+            $('#styleSize').value = elem.fontSize || '1.2rem';
+            $('#styleColor').value = elem.color || '#5a3e3a';
+            $('#styleWeight').value = elem.fontWeight || 'normal';
+            $('#styleAlign').value = elem.textAlign || 'center';
+            overlay.classList.add('show');
+            stylePanel.classList.add('show');
+        }
+
+        function applyStyle() {
+            if (!currentStyleTarget) return;
+            const { pageIndex, elemIndex } = currentStyleTarget;
+            const elem = pagesData[pageIndex].elements[elemIndex];
+            if (!elem || elem.type !== 'text') return;
+            elem.fontFamily = $('#styleFont').value;
+            elem.fontSize = $('#styleSize').value;
+            elem.color = $('#styleColor').value;
+            elem.fontWeight = $('#styleWeight').value;
+            elem.textAlign = $('#styleAlign').value;
+            renderPageElements(pageIndex);
+            closeStylePanel();
+            saveData();
+            showToast('✨ 文字样式已更新');
+        }
+
+        function closeStylePanel() {
+            overlay.classList.remove('show');
+            stylePanel.classList.remove('show');
+            currentStyleTarget = null;
+        }
+
+        // ---------- 照片上传（压缩） ----------
+        function handlePhotoUpload(files) {
+            if (!files || !files.length) return;
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 压缩处理：限制最大宽度600px，质量0.7
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 600;
+                        if (width > maxWidth) {
+                            height = (height / width) * maxWidth;
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                        let displayW = Math.min(220, width);
+                        let displayH = (height/width) * displayW;
+                        pagesData[currentPage].elements.push({
+                            type: 'image', left: 50, top: 50,
+                            src: compressedDataUrl,
+                            width: Math.round(displayW),
+                            height: Math.round(displayH)
+                        });
+                        renderPageElements(currentPage);
+                        saveData();
+                        showToast('📷 照片已添加（自动压缩保存）');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addTextElement() {
+            const txt = prompt('请输入文字内容：', '新祝福语');
+            if (txt !== null && txt.trim()) {
+                pagesData[currentPage].elements.push({
+                    type:'text', left:50, top:55, content: txt.trim(),
+                    fontSize:'1.2rem', color:'#5a3e3a', fontWeight:'normal', textAlign:'center',
+                    fontFamily:'"STKaiti","KaiTi",serif'
+                });
+                renderPageElements(currentPage);
+                saveData();
+                showToast('✏️ 文字已添加');
+            }
+        }
+
+        // ---------- 导出图片 ----------
+        function exportCurrentPageAsImage() {
+            const slide = document.getElementById(`slide-${currentPage}`);
+            if (!slide) return;
+            showToast('⏳ 正在生成高清图片...');
+            html2canvas(slide, {
+                backgroundColor: '#fffaf5',
+                scale: 2,
+                allowTaint: false,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `birthday-page-${currentPage+1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('📥 图片已保存到相册/下载');
+            }).catch(() => {
+                showToast('❌ 导出失败，请重试');
+            });
+        }
+
+        // ---------- 重置 ----------
+        function resetAll() {
+            if (confirm('确定恢复默认5页布局并清除所有保存吗？')) {
+                pagesData = JSON.parse(JSON.stringify(DEFAULT_PAGES));
+                currentPage = 0;
+                buildAllSlides();
+                buildPageIndicators();
+                goToPage(0, false);
+                clearSelection();
+                localStorage.removeItem(STORAGE_KEY);
+                showToast('🔄 已恢复默认');
+            }
+        }
+
+        // ---------- 编辑模式切换 ----------
+        function toggleEditMode() {
+            editMode = !editMode;
+            btnToggleEdit.innerHTML = editMode ? '🔓 编辑' : '🔒 预览';
+            btnToggleEdit.classList.toggle('active', editMode);
+            appContainer.classList.toggle('edit-mode', editMode);
+            clearSelection();
+            if (!editMode) closeStylePanel();
+            renderPageElements(currentPage);
+            showToast(editMode ? '🔓 编辑模式' : '🔒 预览模式');
+        }
+
+        // ---------- 事件绑定 ----------
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('touchmove', (e) => {
+            if ((isDragging || isResizing) && e.touches.length===1) {
+                e.preventDefault();
+                onMouseMove({ clientX:e.touches[0].clientX, clientY:e.touches[0].clientY, preventDefault:()=>{} });
+            }
+        }, { passive: false });
+        document.addEventListener('touchend', onMouseUp);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goToPage(currentPage-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); goToPage(currentPage+1); }
+            else if ((e.key === 'Delete' || e.key === 'Backspace') && editMode && selectedElement && document.activeElement === document.body) {
+                e.preventDefault(); deleteElement(selectedElement.pageIndex, selectedElement.elemIndex);
+            }
+        });
+
+        btnPrev.addEventListener('click', ()=> goToPage(currentPage-1));
+        btnNext.addEventListener('click', ()=> goToPage(currentPage+1));
+        btnAddPage.addEventListener('click', addPage);
+        btnRemovePage.addEventListener('click', removeCurrentPage);
+        btnAddPhoto.addEventListener('click', ()=> fileInput.click());
+        btnAddText.addEventListener('click', addTextElement);
+        btnDeleteSelected.addEventListener('click', ()=>{
+            if (selectedElement) deleteElement(selectedElement.pageIndex, selectedElement.elemIndex);
+        });
+        btnToggleEdit.addEventListener('click', toggleEditMode);
+        btnReset.addEventListener('click', resetAll);
+        btnExportImage.addEventListener('click', exportCurrentPageAsImage);
+        fileInput.addEventListener('change', (e) => { handlePhotoUpload(e.target.files); fileInput.value=''; });
+        $('#btnApplyStyle').addEventListener('click', applyStyle);
+        $('#btnCancelStyle').addEventListener('click', closeStylePanel);
+        overlay.addEventListener('click', closeStylePanel);
+
+        // 触摸滑动翻页
+        let touchStartX = 0;
+        slidesTrack.addEventListener('touchstart', (e) => { if(e.touches.length===1) touchStartX = e.touches[0].clientX; }, {passive:true});
+        slidesTrack.addEventListener('touchend', (e) => {
+            if (isDragging || isResizing) return;
+            const dx = (e.changedTouches[0]?.clientX || touchStartX) - touchStartX;
+            if (Math.abs(dx) > 50) {
+                if (dx < -30 && currentPage < pagesData.length-1) goToPage(currentPage+1);
+                else if (dx > 30 && currentPage > 0) goToPage(currentPage-1);
+            }
+        });
+
+        // 背景粒子
+        function createParticles() {
+            const container = $('#bgParticles');
+            const colors = ['#f7c5b5','#e0c78a','#fce4d6','#ffe0d0','#d4c0a5','#f9d5c8'];
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div');
+                p.className = 'bg-particle';
+                const s = Math.random()*16+6;
+                p.style.width = s+'px'; p.style.height = s+'px';
+                p.style.left = Math.random()*95+'%';
+                p.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+                p.style.animationDuration = (Math.random()*12+8)+'s';
+                p.style.animationDelay = (Math.random()*10)+'s';
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        // ---------- 启动 ----------
+        buildAllSlides();
+        buildPageIndicators();
+        goToPage(currentPage, false);
+        appContainer.classList.add('edit-mode');
+        updateIndicatorsAndNav();
+        btnDeleteSelected.disabled = true;
+        showToast('🎂 数据自动保存中，放心编辑！');
+    })();
+</script>
+</body>
+</html>
